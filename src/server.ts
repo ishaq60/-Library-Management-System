@@ -1,5 +1,5 @@
 import { Server } from "http";
-import app from "./src/app/app";
+import app from "./app/app";
 const mongoose = require('mongoose');
 
 let server:Server

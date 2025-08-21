@@ -1,20 +1,24 @@
+// server.ts
 import { Server } from "http";
 import app from "./app/app";
-const mongoose = require('mongoose');
+import mongoose from "mongoose"; // better to use ES module import
+import dotenv from "dotenv";
 
-let server:Server
-const PORT=3000
+dotenv.config();
+
+let server: Server;
+const PORT = process.env.PORT || 3000;
+
 async function main() {
-  try{
-    await mongoose.connect('mongodb+srv://LibraryManagement:n1Akhhx2k5y5GmRT@cluster0.uqruf4z.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0');
+  try {
+    await mongoose.connect(process.env.MONGO_URI as string);
     
-    server=app.listen(PORT,()=>{
-        console.log(`app is listening on port ${PORT}`)
-    })
-
+    server = app.listen(PORT, () => {
+      console.log(`App is listening on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to connect to MongoDB", error);
   }
-catch(error) {
+}
 
-}
-}
-main()
+main();

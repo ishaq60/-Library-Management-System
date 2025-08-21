@@ -24,18 +24,9 @@ The main objective of this project is to:
 
 ---
 
-## 📂 Project Structure  
+## 📂 Project Structure
 
-📦 library-management-api
-┣ 📂 src
-┃ ┣ 📂 models # Book & Borrow Schemas
-┃ ┣ 📂 controllers # Business logic
-┃ ┣ 📂 routes # API routes
-┃ ┣ 📂 middlewares # Error handling, validations
-┃ ┗ server.ts # Entry point
-┣ 📜 package.json
-┣ 📜 tsconfig.json
-┗ 📜 README.md
+![Project Structure](https://i.ibb.co/7JJC4DYh)
 
 
 

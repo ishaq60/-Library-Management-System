@@ -51,38 +51,65 @@ bookRoutes.get("/", async (req: Request, res: Response) => {
 //
 bookRoutes.get("/:bookId", async (req: Request, res: Response) => {
   try {
-    const bookId = req.params.bookId;
+    const { bookId } = req.params;
 
     const book = await Book.findById(bookId);
-    res.status(201).json({
+
+    if (!book) {
+      return res.status(404).json({
+        success: false,
+        message: "Book not found",
+      });
+    }
+
+    res.status(200).json({
       success: true,
-      message: "Book retrieved successfull",
-      book: book,
+      message: "Book retrieved successfully",
+      data: book,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({
       success: false,
-      message: "Error fetching books",
+      message: "Error fetching book",
       error: error instanceof Error ? error.message : error,
     });
   }
 });
-bookRoutes.patch("/:bookId", async (req: Request, res: Response) => {
+
+bookRoutes.put("/:bookId", async (req: Request, res: Response) => {
   try {
-    const bookId = req.params.bookId;
-const updatebody=req.body
-    const book = await Book.findByIdAndUpdate(bookId,updatebody,{new:true})
-    res.status(201).json({
+    const { bookId } = req.params;
+    const updateBody = req.body;
+
+    // Auto-set available field based on copies
+    if (updateBody.copies !== undefined) {
+      updateBody.available = updateBody.copies > 0;
+    }
+
+    const updatedBook = await Book.findByIdAndUpdate(
+      bookId,
+      updateBody,
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedBook) {
+      return res.status(404).json({
+        success: false,
+        message: "Book not found",
+      });
+    }
+
+    res.status(200).json({
       success: true,
       message: "Book updated successfully",
-      data: book,
+      data: updatedBook,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({
       success: false,
-      message: "Error Upadeing Book ",
+      message: "Error updating book",
       error: error instanceof Error ? error.message : error,
     });
   }

@@ -3,6 +3,7 @@ import { Book } from "../models/books.model";
 
 export const bookRoutes = express.Router();
 bookRoutes.post("/create-book", async (req: Request, res: Response) => {
+try{
   const body = req.body;
   console.log(body);
   const book = await Book.create(body);
@@ -12,6 +13,10 @@ bookRoutes.post("/create-book", async (req: Request, res: Response) => {
     message: "Book create Successfully",
     data: book,
   });
+}
+catch(error){
+ res.status(400).json({ success: false, message: "Validation failed", error });
+}
 });
 
 //all book find
@@ -37,7 +42,7 @@ bookRoutes.get("/", async (req: Request, res: Response) => {
     console.log(err);
     res.status(500).json({
       success: false,
-      message: "Error fetching books",
+      message: "error retrieveding book",
       error: err instanceof Error ? err.message : err,
     });
   }
@@ -77,7 +82,7 @@ const updatebody=req.body
     console.log(error);
     res.status(500).json({
       success: false,
-      message: "Error fetching books",
+      message: "Error Upadeing Book ",
       error: error instanceof Error ? error.message : error,
     });
   }

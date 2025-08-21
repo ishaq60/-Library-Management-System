@@ -8,6 +8,7 @@ isbn:string,
 description?:string,
 copies:number,
 available:boolean,
+decreaseCopies(quantity: number): Promise<void>
 userId:Types.ObjectId
 
 }

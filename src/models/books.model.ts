@@ -23,11 +23,35 @@ const bookSchema = new Schema<IBook>({
     trim: true,
   },
   description: { type: String, default: "", trim: true },
-  copies: { type: Number, required: [true,"Copies count is required"] },
+  copies: { type: Number, required: [true,"Copies count is required"],min:[0,"copies cannot be negative"] },
   available: { type: Boolean, default:true },
- 
+
+
 },
 {
     timestamps:true
 });
+
+bookSchema.pre("save",function(next){
+  this.available=this.copies>0
+  console.log(next)
+  next()
+})
+
+bookSchema.methods.decreaseCopies = async function (quantity: number) {
+  if (this.copies < quantity) {
+    throw new Error("Not enough copies available");
+  }
+
+  this.copies -= quantity;
+
+  if (this.copies === 0) {
+    this.available = false;
+  }
+
+  await this.save();
+};
+
+
+
 export const Book=model("Book",bookSchema)

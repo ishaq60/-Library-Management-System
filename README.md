@@ -26,7 +26,8 @@ The main objective of this project is to:
 
 ## 📂 Project Structure
 
-![Project Structure](https://i.ibb.co.com/hRjmQF3V/Screenshot-2025-08-21-213016.png)
+![Project Structure](https://i.ibb.co/hRjmQF3V/Screenshot-2025-08-21-213016.png)
+
 
 
 

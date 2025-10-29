@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import { Book } from "../models/books.model";
 
 export const bookRoutes = express.Router();
-bookRoutes.post("/create-book", async (req: Request, res: Response) => {
+bookRoutes.post("/", async (req: Request, res: Response) => {
 try{
   const body = req.body;
   console.log(body);
@@ -120,8 +120,16 @@ bookRoutes.delete("/:bookId", async (req: Request, res: Response) => {
   try {
     const bookId = req.params.bookId;
 
-    const book = await Book.findByIdAndDelete(bookId,{new:true});
-    res.status(201).json({
+    const book = await Book.findByIdAndDelete(bookId);
+
+    if (!book) {
+      return res.status(404).json({
+        success: false,
+        message: "Book not found",
+      });
+    }
+
+    res.status(200).json({
       success: true,
       message: "Book deleted successfully",
       data: book,
@@ -130,7 +138,7 @@ bookRoutes.delete("/:bookId", async (req: Request, res: Response) => {
     console.log(error);
     res.status(500).json({
       success: false,
-      message: "Error fetching books",
+      message: "Error deleting book",
       error: error instanceof Error ? error.message : error,
     });
   }

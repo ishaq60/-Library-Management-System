@@ -7,14 +7,21 @@ const bookSchema = new Schema<IBook>({
   genre: {
     type: String,
     required: true,
-    enum: [
-      "FICTION",
-      "NON-FICTION",
-      "SCIENCE",
-      "HISTORY",
-      "BIOGRAPHY",
-      "FANTASY",
-    ],
+  genre: {
+  type: String,
+  enum: [
+    "Fiction",
+    "Non-Fiction",
+    "Science",
+    "Technology",
+    "History",
+    "Biography",
+    "Programming / Software Development", // ✅ Added
+  ],
+  required: true,
+}
+
+
   },
   isbn: {
     type: String,
@@ -23,7 +30,16 @@ const bookSchema = new Schema<IBook>({
     trim: true,
   },
   description: { type: String, default: "", trim: true },
-  copies: { type: Number, required: [true,"Copies count is required"],min:[0,"copies cannot be negative"] },
+ copies: {
+  type: Number,
+  required: [true, "Copies count is required"],
+  min: [0, "Copies cannot be negative"],
+  validate: {
+    validator: Number.isInteger,
+    message: "Copies must be an integer value",
+  },
+},
+
   available: { type: Boolean, default:true },
 
 
@@ -32,11 +48,10 @@ const bookSchema = new Schema<IBook>({
     timestamps:true
 });
 
-bookSchema.pre("save",function(next){
-  this.available=this.copies>0
-  console.log(next)
-  next()
-})
+bookSchema.pre("save", function (next) {
+  this.available = this.copies > 0;
+  next();
+});
 
 bookSchema.methods.decreaseCopies = async function (quantity: number) {
   if (this.copies < quantity) {

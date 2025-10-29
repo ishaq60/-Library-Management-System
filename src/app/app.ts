@@ -1,12 +1,13 @@
 
 import express,{Application,Request,Response} from "express"
 
-import { bookRoutes } from "../controller/bookes.controller"
+import { bookRoutes } from "../controller/books.controller"
 import { borrowRoutes } from '../controller/borrow.controller';
 import { errorHandler } from "../middlewares/errorHandler";
 const app:Application=express()
-
+import cors from "cors";
 app.use(express.json())
+app.use(cors());
 
 app.use("/api/books",bookRoutes)
 

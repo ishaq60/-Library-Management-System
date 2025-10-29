@@ -1,14 +1,18 @@
 import { Types } from "mongoose";
 
+export type Genre = "FICTION" | "NON_FICTION" | "SCIENCE" | "HISTORY" | "BIOGRAPHY" | "FANTASY";
+
 export interface IBook{
 title:string,
 author:string,
-genre:string,
+genre:Genre,
 isbn:string,
 description?:string,
 copies:number,
 available:boolean,
-decreaseCopies(quantity: number): Promise<void>
-userId:Types.ObjectId
 
+}
+
+export interface IBookMethods {
+  decreaseCopies(quantity: number): Promise<void>;
 }

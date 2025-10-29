@@ -1,72 +1,70 @@
-import { IBook } from "Interface/book.interface";
-import { model, Schema } from "mongoose";
+import { IBook,IBookMethods,Genre } from "../Interface/book.interface";
+import { model, Schema, Model } from "mongoose";
 
-const bookSchema = new Schema<IBook>({
-  title: { type: String, required: true, trim: true },
-  author: { type: String, required: true, trim: true },
-  genre: {
-    type: String,
-    required: true,
-  genre: {
-  type: String,
-  enum: [
-    "Fiction",
-    "Non-Fiction",
-    "Science",
-    "Technology",
-    "History",
-    "Biography",
-    "Programming / Software Development", // ✅ Added
-  ],
-  required: true,
+
+interface BookModel extends Model<IBook, {}, IBookMethods> {
+  decreaseCopies(id:string,quantity: number): Promise<void>;
 }
 
 
+const bookSchema = new Schema<IBook, BookModel, IBookMethods>(
+  {
+    title: {
+      type: String,
+      required: [true, "title is required"],
+    },
+    author: {
+      type: String,
+      required: [true, "author is required"],
+    },
+    genre: {
+      type: String,
+      required: [true, "genre is required"],
+      enum: ["FICTION", "NON_FICTION", "SCIENCE", "HISTORY", "BIOGRAPHY", "FANTASY"],
+    },
+    isbn: {
+      type: String,
+      required: [true, "isbn is required"],
+      unique: true,
+    },
+    description: {
+      type: String,
+    },
+    copies: {
+      type: Number,
+      required: [true, "copies is required"],
+      min: [0, "Copies must be a non-negative number"],
+    },
+    available: {
+      type: Boolean,
+      default: true,
+    },
   },
-  isbn: {
-    type: String,
-    required: [true, "ISBN is required"],
-    unique: true,
-    trim: true,
-  },
-  description: { type: String, default: "", trim: true },
- copies: {
-  type: Number,
-  required: [true, "Copies count is required"],
-  min: [0, "Copies cannot be negative"],
-  validate: {
-    validator: Number.isInteger,
-    message: "Copies must be an integer value",
-  },
-},
+  {
+    timestamps: true,
+    toJSON: {
+      virtuals: true,
+    },
+  }
+);
 
-  available: { type: Boolean, default:true },
-
-
-},
-{
-    timestamps:true
-});
-
-bookSchema.pre("save", function (next) {
-  this.available = this.copies > 0;
+bookSchema.pre('save', function(next) {
+  if (this.isModified('copies') && this.copies === 0) {
+    this.available = false;
+  }
   next();
 });
 
-bookSchema.methods.decreaseCopies = async function (quantity: number) {
-  if (this.copies < quantity) {
-    throw new Error("Not enough copies available");
+bookSchema.static('decreaseCopies',async function decreaseCopies(id:string,quantity: number) {
+  const book = await this.findById(id);
+  if (!book) {
+    throw new Error('Book not found');
   }
-
-  this.copies -= quantity;
-
-  if (this.copies === 0) {
-    this.available = false;
+  book.copies -= quantity;
+  if (book.copies === 0) {
+    book.available = false;
   }
+  await book.save();
+});
 
-  await this.save();
-};
-
-
-
-export const Book=model("Book",bookSchema)
+export const Book = model<IBook, BookModel>("Book", bookSchema);

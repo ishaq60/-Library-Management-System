@@ -3,47 +3,49 @@ import { Book } from "../models/books.model";
 
 export const bookRoutes = express.Router();
 bookRoutes.post("/", async (req: Request, res: Response) => {
-try{
-  const body = req.body;
-  console.log(body);
-  const book = await Book.create(body);
-  await book.save();
-  res.status(201).json({
-    success: true,
-    message: "Book create Successfully",
-    data: book,
-  });
-}
-catch(error){
- res.status(400).json({ success: false, message: "Validation failed", error });
-}
+  try {
+    const book = await Book.create(req.body);
+    res.status(201).json({
+      success: true,
+      message: "Book created successfully",
+      data: book,
+    });
+  } catch (error:any) {
+    res.status(400).json({
+      success: false,
+      message: "Validation failed",
+      error: error,
+    });
+  }
 });
 
 //all book find
 bookRoutes.get("/", async (req: Request, res: Response) => {
   try {
-    const {
-      filter,
-      sortBy = "createdAt",
-      sort = "asc",
-      limit = "10",
-    } = req.query;
+    const { filter, sortBy = "createdAt", sort = "asc", limit = "10" } = req.query;
 
-    const books = await Book.find(filter ? { genre: filter } : {})
-      .sort({ [sortBy as string]: sort === "desc" ? -1 : 1 })
-      .limit(Number(limit) || 10);
+    const query: any = {};
+    if (filter) {
+      query.genre = filter; 
+    }
+
+    const sortOptions: { [key: string]: 1 | -1 } = {};
+    sortOptions[sortBy as string] = sort === "desc" ? -1 : 1;
+
+    const books = await Book.find(query)
+      .sort(sortOptions)
+      .limit(Number(limit));
 
     res.status(200).json({
       success: true,
       message: "Books retrieved successfully",
-      data:books,
+      data: books,
     });
-  } catch (err) {
-    console.log(err);
+  } catch (error:any) {
     res.status(500).json({
       success: false,
-      message: "error retrieveding book",
-      error: err instanceof Error ? err.message : err,
+      message: "Error retrieving books",
+      error: error,
     });
   }
 });
@@ -59,6 +61,7 @@ bookRoutes.get("/:bookId", async (req: Request, res: Response) => {
       return res.status(404).json({
         success: false,
         message: "Book not found",
+        error: null,
       });
     }
 
@@ -67,12 +70,11 @@ bookRoutes.get("/:bookId", async (req: Request, res: Response) => {
       message: "Book retrieved successfully",
       data: book,
     });
-  } catch (error) {
-    console.error(error);
+  } catch (error:any) {
     res.status(500).json({
       success: false,
       message: "Error fetching book",
-      error: error instanceof Error ? error.message : error,
+      error: error,
     });
   }
 });
@@ -82,7 +84,6 @@ bookRoutes.put("/:bookId", async (req: Request, res: Response) => {
     const { bookId } = req.params;
     const updateBody = req.body;
 
-    // Auto-set available field based on copies
     if (updateBody.copies !== undefined) {
       updateBody.available = updateBody.copies > 0;
     }
@@ -97,6 +98,7 @@ bookRoutes.put("/:bookId", async (req: Request, res: Response) => {
       return res.status(404).json({
         success: false,
         message: "Book not found",
+        error: null,
       });
     }
 
@@ -105,12 +107,11 @@ bookRoutes.put("/:bookId", async (req: Request, res: Response) => {
       message: "Book updated successfully",
       data: updatedBook,
     });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
+  } catch (error:any) {
+    res.status(400).json({
       success: false,
       message: "Error updating book",
-      error: error instanceof Error ? error.message : error,
+      error: error,
     });
   }
 });
@@ -120,26 +121,26 @@ bookRoutes.delete("/:bookId", async (req: Request, res: Response) => {
   try {
     const bookId = req.params.bookId;
 
-    const book = await Book.findByIdAndDelete(bookId);
+    const deletedBook = await Book.findByIdAndDelete(bookId);
 
-    if (!book) {
+    if (!deletedBook) {
       return res.status(404).json({
         success: false,
         message: "Book not found",
+        error: null,
       });
     }
 
     res.status(200).json({
       success: true,
       message: "Book deleted successfully",
-      data: book,
+      data: null,
     });
-  } catch (error) {
-    console.log(error);
+  } catch (error:any) {
     res.status(500).json({
       success: false,
       message: "Error deleting book",
-      error: error instanceof Error ? error.message : error,
+      error: error,
     });
   }
 });

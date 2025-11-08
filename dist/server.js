@@ -12,19 +12,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const app_1 = __importDefault(require("./src/app/app"));
-const mongoose = require('mongoose');
-let server;
-const PORT = 3000;
+const app_1 = __importDefault(require("./app/app"));
+const mongoose_1 = __importDefault(require("mongoose"));
+const dotenv_1 = __importDefault(require("dotenv"));
+const cors_1 = __importDefault(require("cors"));
+dotenv_1.default.config();
+const PORT = process.env.PORT || 3000;
+// Enable CORS for all origins (dev)
+app_1.default.use((0, cors_1.default)());
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield mongoose.connect('mongodb+srv://LibraryManagement:n1Akhhx2k5y5GmRT@cluster0.uqruf4z.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0');
-            server = app_1.default.listen(PORT, () => {
-                console.log(`app is listening on port ${PORT}`);
-            });
+            yield mongoose_1.default.connect(process.env.MONGO_URI);
+            app_1.default.listen(PORT, () => console.log(`Server running on port ${PORT}`));
         }
         catch (error) {
+            console.error("Failed to connect to MongoDB", error);
         }
     });
 }
